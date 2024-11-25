@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useCart } from "../services/CartContext";
 
 const ShirtInfo = () => {
   const [product, setProduct] = useState(null);
   const [selectedSize, setSelectedSize] = useState("");
   const [error, setError] = useState(null);
+  const { addToCart } = useCart();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -12,7 +14,6 @@ const ShirtInfo = () => {
         const response = await axios.get(
           "https://3sb655pz3a.execute-api.ap-southeast-2.amazonaws.com/live/product"
         );
-        console.log("Product data:", response.data);
         setProduct(response.data);
       } catch (err) {
         console.error("Error fetching product:", err);
@@ -22,6 +23,20 @@ const ShirtInfo = () => {
 
     fetchData();
   }, []);
+
+  const handleAddToCart = () => {
+    if (!selectedSize) {
+      alert("Please select a size before adding to cart.");
+      return;
+    }
+
+    const itemToAdd = {
+      ...product,
+      size: selectedSize,
+      quantity: 1,
+    };
+    addToCart(itemToAdd);
+  };
 
   if (error) return <div>Error: {error}</div>;
   if (!product) return <div>Loading...</div>;
@@ -40,24 +55,29 @@ const ShirtInfo = () => {
             Price: ${product.price.toFixed(2)}
           </p>
           <p className="mb-3">{product.description}</p>
-          <p className="text-lightgrey">Size*</p>
-          <div className="flex flex-wrap items-center space-x-2 my-4">
-            {product.sizeOptions.map((size) => (
-              <button
-                key={size.id}
-                onClick={() => setSelectedSize(size.label)}
-                className={`border px-3 py-1  ${
-                  selectedSize === size.label
-                    ? "bg-black text-white"
-                    : "text-black bg-white"
-                }`}
-              >
-                {size.label}
-              </button>
-            ))}
+          <div className="my-4">
+            <p className="text-lightgrey">Size*</p>
+            <div className="flex flex-wrap items-center space-x-2">
+              {product.sizeOptions.map((size) => (
+                <button
+                  key={size.id}
+                  onClick={() => setSelectedSize(size.label)}
+                  className={`border px-3 py-1 rounded ${
+                    selectedSize === size.label
+                      ? "bg-black text-white"
+                      : "text-black bg-white border-gray-300"
+                  }`}
+                >
+                  {size.label}
+                </button>
+              ))}
+            </div>
           </div>
-          <button className="bg-white text-black py-2 px-4 border-black hover:bg-gray-700 transition duration-300">
-            Add to Cart
+          <button
+            onClick={handleAddToCart}
+            className="bg-black text-white py-2 px-4 rounded hover:bg-gray-700 transition duration-300"
+          >
+            ADD TO CART
           </button>
         </div>
       </div>
