@@ -5,19 +5,26 @@ import { useCart } from "../services/CartContext";
 const apiURL = process.env.REACT_APP_API_URL;
 
 const ShirtInfo = () => {
+  // State hooks for managing the shirt details, selected size, and any errors during the fetch operation.
   const [product, setProduct] = useState(null);
   const [selectedSize, setSelectedSize] = useState("");
   const [error, setError] = useState(null);
+
+  // Extract the addToCart function from the cart context to allow adding items to the cart.
   const { addToCart } = useCart();
 
+  // useEffect hook to handle fetching product data from the API or cache on component mount.
   useEffect(() => {
+    //attempt to retrieve product data and cache time from local storage
     const productCache = localStorage.getItem("productData");
     const cacheTime = localStorage.getItem("cacheTime");
 
+    // Fetch product data from the API if not cached or cache is older than 1 hour.
     const fetchData = async () => {
       if (productCache && new Date().getTime() - cacheTime < 3600000) {
         setProduct(JSON.parse(productCache));
       } else {
+        // Fetch product data from the API and store it in local storage.
         try {
           const response = await axios.get(apiURL);
           localStorage.setItem("productData", JSON.stringify(response.data));
@@ -33,6 +40,7 @@ const ShirtInfo = () => {
     fetchData();
   }, []);
 
+  // Function to handle adding the selected product to the cart.
   const handleAddToCart = () => {
     if (!selectedSize) {
       alert("Please select a size before adding to cart.");
