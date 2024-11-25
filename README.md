@@ -37,7 +37,11 @@ To get a local copy up and running, follow these simple steps:
    npm install
    ```
 
-3. **Run the application**
+3. **Create .env**
+
+Create a .env file with the following variable name for the API endpoint - REACT_APP_API_URL
+
+4. **Run the application**
 
    ```bash
    npm start
