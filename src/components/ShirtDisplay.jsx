@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useCart } from "../services/CartContext";
 
+const apiURL = process.env.REACT_APP_API_URL;
+
 const ShirtInfo = () => {
   const [product, setProduct] = useState(null);
   const [selectedSize, setSelectedSize] = useState("");
@@ -9,15 +11,22 @@ const ShirtInfo = () => {
   const { addToCart } = useCart();
 
   useEffect(() => {
+    const productCache = localStorage.getItem("productData");
+    const cacheTime = localStorage.getItem("cacheTime");
+
     const fetchData = async () => {
-      try {
-        const response = await axios.get(
-          "https://3sb655pz3a.execute-api.ap-southeast-2.amazonaws.com/live/product"
-        );
-        setProduct(response.data);
-      } catch (err) {
-        console.error("Error fetching product:", err);
-        setError("Failed to fetch product details.");
+      if (productCache && new Date().getTime() - cacheTime < 3600000) {
+        setProduct(JSON.parse(productCache));
+      } else {
+        try {
+          const response = await axios.get(apiURL);
+          localStorage.setItem("productData", JSON.stringify(response.data));
+          localStorage.setItem("cacheTime", new Date().getTime());
+          setProduct(response.data);
+        } catch (err) {
+          console.error("Error fetching product:", err);
+          setError("Failed to fetch product details.");
+        }
       }
     };
 
